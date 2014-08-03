@@ -5,6 +5,7 @@ import "flag"
 import "path/filepath"
 import "strings"
 import "os"
+import "regexp"
 
 var options struct {
   mask  string
@@ -29,6 +30,7 @@ func main() {
       options.mask = strings.Replace(options.mask, token, arg, -1)
     }
   }
+  options.mask = regexp.MustCompile(`%\d+`).ReplaceAllString(options.mask, "")
 
   for _, next_mask := range filepath.SplitList(options.mask) {
     matches, _ := filepath.Glob(next_mask)
