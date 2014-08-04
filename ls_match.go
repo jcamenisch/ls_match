@@ -31,6 +31,9 @@ func main() {
     }
   }
   options.mask = regexp.MustCompile(`%\d+`).ReplaceAllString(options.mask, "")
+  if strings.Index(options.mask, "~") == 0 && os.Getenv("HOME") != "" {
+    options.mask = strings.Replace(options.mask, "~", os.Getenv("HOME"), 1)
+  }
 
   for _, next_mask := range filepath.SplitList(options.mask) {
     matches, _ := filepath.Glob(next_mask)
