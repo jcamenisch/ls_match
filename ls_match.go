@@ -38,8 +38,10 @@ func main() {
   for _, next_mask := range filepath.SplitList(options.mask) {
     matches, _ := filepath.Glob(next_mask)
 
-    for _, match := range matches {
-      print(match)
+    for _, path := range matches {
+      if stat, err := os.Stat(path); err == nil && stat.IsDir() {
+        print(path)
+      }
     }
   }
 }
