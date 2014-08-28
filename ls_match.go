@@ -18,6 +18,18 @@ func print(path string) {
   if options.first { os.Exit(0) }
 }
 
+func substituteHomeDir(path string) string {
+  if os.Getenv("HOME") != "" {
+    if path == "~" {
+      return os.Getenv("HOME")
+    } else if path[0:2] == "~" + string(os.PathSeparator) {
+      return filepath.Join(os.Getenv("HOME"), path[2:])
+    }
+  }
+
+  return path
+}
+
 func main() {
   flag.StringVar(&options.mask, "mask",  "",    "A custom glob mask for looking up your directory")
   flag.BoolVar( &options.first, "first", false, "Only print the first match found")
@@ -31,14 +43,11 @@ func main() {
     }
   }
   options.mask = regexp.MustCompile(`%\d+`).ReplaceAllString(options.mask, "")
-  if strings.Index(options.mask, "~") == 0 && os.Getenv("HOME") != "" {
-    options.mask = strings.Replace(options.mask, "~", os.Getenv("HOME"), 1)
-  }
 
   for _, next_mask := range filepath.SplitList(options.mask) {
-    matches, _ := filepath.Glob(next_mask)
+    paths, _ := filepath.Glob(substituteHomeDir(next_mask))
 
-    for _, path := range matches {
+    for _, path := range paths {
       if stat, err := os.Stat(path); err == nil && stat.IsDir() {
         print(path)
       }
